@@ -32,7 +32,7 @@ class User {
 		foreach($this->getTransactions() as $transaction) {
 			$sum += $transaction->getSum();
 		}
-		return $sum;
+		return round($sum,2);
 	}
 	public function getTransactions() {
 		return Transaction::getAllByUserId($this->getId());

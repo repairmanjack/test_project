@@ -31,7 +31,7 @@ try {
 		$paramList = $request->getParsedBody();
 		$sum = 0;
 		if(isset($paramList['sum'])) {
-			$sum = abs(floatval($paramList['sum']));
+			$sum = round(abs(floatval($paramList['sum'])),2);
 		}
 		$request = $request->withAttribute('user', $user);
 		$request = $request->withAttribute('sum', $sum);
