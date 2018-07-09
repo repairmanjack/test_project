@@ -28,11 +28,7 @@ class User {
 		return $this->logged;
 	}
 	public function getTransactionSum() {
-		$sum = 0;
-		foreach($this->getTransactions() as $transaction) {
-			$sum += $transaction->getSum();
-		}
-		return round($sum,2);
+		return $this->summ;
 	}
 	public function getTransactions() {
 		return Transaction::getAllByUserId($this->getId());
@@ -43,10 +39,7 @@ class User {
 			$login = mysqli_real_escape_string(db::inst()->getDb(), $authData['login']);
 			$passw = md5($authData['passw']);
 			if(mysqli_num_rows($resource = db::inst()->query("SELECT * FROM `users` WHERE `login`='{$login}' AND `passw`='{$passw}'"))) {
-				$userRow = mysqli_fetch_assoc($resource);
-				$ret->setId($userRow['id']);
-				$ret->setLogin($userRow['login']);
-				$ret->setLogged(true);
+				$ret->fromArray(mysqli_fetch_assoc($resource))->setLogged(true);
 			}
 		}
 		return $ret;
@@ -55,10 +48,7 @@ class User {
 		$ret = new User;
 		$id = intval($id);
 		if(mysqli_num_rows($resource = db::inst()->query("SELECT * FROM `users` WHERE `id`='{$id}'"))) {
-			$userRow = mysqli_fetch_assoc($resource);
-			$ret->setId($userRow['id']);
-			$ret->setLogin($userRow['login']);
-			$ret->setLogged(true);
+			$ret->fromArray(mysqli_fetch_assoc($resource))->setLogged(true);
 		}
 		return $ret;
 	}
@@ -71,8 +61,24 @@ class User {
 	private function setLogged($logged=false) {
 		$this->logged=$logged;
 	}
+	private function setSum($sum) {
+		$this->summ = $sum;
+	}
+	private function fromArray(Array $userRow) {
+		if(isset($userRow['id'])) {
+			$this->setId($userRow['id']);
+		}
+		if(isset($userRow['login'])) {
+			$this->setLogin($userRow['login']);
+		}
+		if(isset($userRow['summ'])) {
+			$this->setSum($userRow['summ']);
+		}
+		return $this;
+	}
 	private $id;
 	private $login;
 	private $passw;
 	private $logged;
+	private $summ;
 }

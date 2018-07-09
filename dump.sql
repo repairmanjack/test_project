@@ -2,8 +2,7 @@
 SQLyog Ultimate v12.09 (64 bit)
 MySQL - 5.1.73-community : Database - test
 *********************************************************************
-*/
-
+*/
 
 /*!40101 SET NAMES utf8 */;
 
@@ -25,7 +24,7 @@ CREATE TABLE `transactions` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=utf8;
 
 /*Data for the table `transactions` */
 
@@ -39,13 +38,14 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `login` varchar(255) NOT NULL,
   `passw` varchar(32) NOT NULL,
+  `summ` decimal(8,2) NOT NULL DEFAULT '0.00',
   PRIMARY KEY (`id`),
   UNIQUE KEY `login` (`login`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 /*Data for the table `users` */
 
-insert  into `users`(`id`,`login`,`passw`) values (1,'admin','21232f297a57a5a743894a0e4a801fc3');
+insert  into `users`(`id`,`login`,`passw`,`summ`) values (1,'admin','21232f297a57a5a743894a0e4a801fc3','100500.00'),(2,'user','ee11cbb19052e40b07aac0ca060c23ee','0.00');
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

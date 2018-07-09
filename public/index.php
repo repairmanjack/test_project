@@ -8,6 +8,7 @@ use Test\Models\User;
 use Test\Models\Transaction;
 use Test\Render;
 
+chdir(dirname(__DIR__));
 require 'vendor/autoload.php';
 require 'dbconfig.php';
 
@@ -38,24 +39,12 @@ try {
 		$action = function(ServerRequestInterface $request) {
 			$user = $request->getAttribute('user');
 			$sum = $request->getAttribute('sum');
-			$userSum = $user->getTransactionSum();
-			$error = null;
-			if(($userSum-$sum)<0) {
-				$error = "На вашем счёте не достаточно средств для списания суммы {$sum} руб. Текущий остаток: {$userSum} руб.";
-			} elseif(!$sum) {
-				$error = "Сумма транзакции не может быть равна 0";
-			}
-			if(!is_null($error)) {
-				return new HtmlResponse(Render::render('Test/View/error.html', compact('error')));
-			} else {
-				$tr = new Transaction;
-				$tr->setSum($sum);
-				$tr->setUserId($user->getId());
-				$tr->setDateTime(date('Y-m-d H:i:s'));
-				$tr->save();
-				return (new HtmlResponse(''))->withHeader('Location', '/');
-			}
-			
+            $tr = new Transaction;
+            $tr->setSum($sum);
+            $tr->setUserId($user->getId());
+            $tr->setDateTime(date('Y-m-d H:i:s'));
+            $tr->save();
+            return (new HtmlResponse(''))->withHeader('Location', '/');
 		};
 	}
 
@@ -64,9 +53,10 @@ try {
 	} else {
 		$response = new HtmlResponse("Страница не найдена", 404);
 	}
-	
+
 } catch(Exception $e) {
-	$response = new HtmlResponse($e->getMessage(), 400);
+    $error = $e->getMessage();
+    $response = new HtmlResponse(Render::render('Test/View/error.html', compact('error')));
 }
 
 

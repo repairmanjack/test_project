@@ -57,16 +57,41 @@ class Transaction {
 	public function save() {
 		$sum = $this->getSum();
 		$link = db::inst()->getDb();
+		$userId = $this->getUserId();
+		$targetUserId = 2;
+		$time = $this->getDateTimeDb();
+
+		if(!floatval($sum)) {
+            throw new \Exception("Сумма транзакции не может быть равна 0.");
+        }
+
+        mysqli_autocommit($link,false);
 		mysqli_begin_transaction($link);
-		$result = db::inst()->query( 
-			"INSERT INTO `transactions` (`user_id`,`summ`,`datetime`) values ('{$this->getUserId()}', '-{$sum}', '{$this->getDateTimeDb()}');"
+
+		if(floatval(mysqli_fetch_assoc(
+		    db::inst()->query("SELECT `summ`-'{$sum}' cnt FROM `users` WHERE `id`='{$userId}'")
+        )['cnt'])<0) {
+            mysqli_rollback($link);
+            throw new \Exception("На вашем счёте не достаточно средств для списания суммы {$sum} руб.");
+        }
+
+		$ret = db::inst()->query( 
+			"INSERT INTO `transactions` (`user_id`,`summ`,`datetime`) values ('{$userId}', '-{$sum}', '{$time}');"
+		) && db::inst()->query( 
+			"INSERT INTO `transactions` (`user_id`,`summ`,`datetime`) values ('{$targetUserId}', '{$sum}', '{$time}');"
+		) && db::inst()->query( 
+			"UPDATE `users` SET `summ`=`summ`-'{$sum}' WHERE `id`='{$userId}'"
+		) && db::inst()->query( 
+			"UPDATE `users` SET `summ`=`summ`+'{$sum}' WHERE `id`='{$targetUserId}'"
 		);
-		/*
-		* Сюда можно вставить запрос на добавление списанных средств другому пользователю,
-        * чтобы он выполнился в рамках транзакции
-		*/
+
+		if(!$ret) {
+            mysqli_rollback($link);
+            throw new \Exception("Ошибка выполнения транзакции.");
+        }
+
 		mysqli_commit($link);
-		return $result;
+		return $ret;
 	}
 	private function setId($id) {
 		$this->id = intval($id);
