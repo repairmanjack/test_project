@@ -24,7 +24,7 @@ class DataBase {
     private static $instance;
     private $db;
 	private function setDb() {
-		if(!($this->db = @mysqli_connect(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME))) {
+		if(!($this->db = mysqli_connect(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME))) {
 			throw new \Exception('Can\'t connect to DB!');
 		}
 	}

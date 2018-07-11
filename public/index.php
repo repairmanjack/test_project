@@ -20,13 +20,13 @@ try {
 	$user = User::auth($request);
 	if(!$user->isLogged()) {
 		$action = function(ServerRequestInterface $request) {
-			return new HtmlResponse(file_get_contents('Test/View/auth.html'));
+			return new HtmlResponse(file_get_contents('Test/View/auth.tpl'));
 		};
 	} elseif($path == '/') {
 		$request = $request->withAttribute('user', $user);
 		$action = function(ServerRequestInterface $request) {
 			$user = $request->getAttribute('user');
-			return new HtmlResponse(Render::render('Test/View/index.html', compact('user')));
+			return new HtmlResponse(Render::render('Test/View/index.tpl', compact('user')));
 		};
 	} elseif($path == '/pay') {
 		$paramList = $request->getParsedBody();
@@ -56,7 +56,7 @@ try {
 
 } catch(Exception $e) {
     $error = $e->getMessage();
-    $response = new HtmlResponse(Render::render('Test/View/error.html', compact('error')));
+    $response = new HtmlResponse(Render::render('Test/View/error.tpl', compact('error')));
 }
 
 

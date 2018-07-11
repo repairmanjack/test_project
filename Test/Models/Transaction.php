@@ -63,31 +63,29 @@ class Transaction {
 
 		if(!floatval($sum)) {
             throw new \Exception("Сумма транзакции не может быть равна 0.");
-        }
-
-        mysqli_autocommit($link,false);
+		}
+		
 		mysqli_begin_transaction($link);
 
-		if(floatval(mysqli_fetch_assoc(
-		    db::inst()->query("SELECT `summ`-'{$sum}' cnt FROM `users` WHERE `id`='{$userId}'")
-        )['cnt'])<0) {
-            mysqli_rollback($link);
+		if(!($ret = db::inst()->query( 
+			"UPDATE `users` SET `summ`=IF((@res:=`summ`-'{$sum}')<0,`summ`,@res) WHERE `id`='{$userId}'"
+		) && mysqli_affected_rows($link))) {
+			mysqli_rollback($link);
             throw new \Exception("На вашем счёте не достаточно средств для списания суммы {$sum} руб.");
-        }
+		}
 
-		$ret = db::inst()->query( 
+		$ret = $ret && db::inst()->query( 
+			"UPDATE `users` SET `summ`=`summ`+'{$sum}' WHERE `id`='{$targetUserId}'"
+		) && db::inst()->query( 
 			"INSERT INTO `transactions` (`user_id`,`summ`,`datetime`) values ('{$userId}', '-{$sum}', '{$time}');"
 		) && db::inst()->query( 
 			"INSERT INTO `transactions` (`user_id`,`summ`,`datetime`) values ('{$targetUserId}', '{$sum}', '{$time}');"
-		) && db::inst()->query( 
-			"UPDATE `users` SET `summ`=`summ`-'{$sum}' WHERE `id`='{$userId}'"
-		) && db::inst()->query( 
-			"UPDATE `users` SET `summ`=`summ`+'{$sum}' WHERE `id`='{$targetUserId}'"
 		);
 
 		if(!$ret) {
+			$error = mysqli_error($link);
             mysqli_rollback($link);
-            throw new \Exception("Ошибка выполнения транзакции.");
+            throw new \Exception("Ошибка выполнения транзакции: {$error}");
         }
 
 		mysqli_commit($link);
