@@ -54,12 +54,12 @@ class User {
 		return $ret;
 	}
 	public static function getUserById($id) {
-		return (new User)->setId($id)->updateModel()->setLogged(true);
+		return (new User)->setId($id)->updateModel();
 	}
 	private function updateModel() {
 		$id = $this->getId();
 		if(mysqli_num_rows($resource = db::inst()->query("SELECT * FROM `users` WHERE `id`='{$id}'"))) {
-			$this->fromArray(mysqli_fetch_assoc($resource));
+			$this->fromArray(mysqli_fetch_assoc($resource))->setLogged(true);
 		}
 		return $this;
 	}
