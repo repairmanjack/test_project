@@ -40,7 +40,7 @@ class User {
 			'datetime' => date('Y-m-d H:i:s'),
 			'user_id' => $this->getId()
 		])->save();
-		return $this->getTransactionSum();
+		return $this->updateModel()->getTransactionSum();
 	}
 	public static function login(Array $authData) {
 		$ret = new User;
@@ -54,21 +54,25 @@ class User {
 		return $ret;
 	}
 	public static function getUserById($id) {
-		$ret = new User;
-		$id = intval($id);
+		return (new User)->setId($id)->updateModel()->setLogged(true);
+	}
+	private function updateModel() {
+		$id = $this->getId();
 		if(mysqli_num_rows($resource = db::inst()->query("SELECT * FROM `users` WHERE `id`='{$id}'"))) {
-			$ret->fromArray(mysqli_fetch_assoc($resource))->setLogged(true);
+			$this->fromArray(mysqli_fetch_assoc($resource));
 		}
-		return $ret;
+		return $this;
 	}
 	private function setId($id) {
 		$this->id=$id;
+		return $this;
 	}
 	private function setLogin($login) {
 		$this->login=$login;
 	}
 	private function setLogged($logged=false) {
 		$this->logged=$logged;
+		return $this;
 	}
 	private function setSum($sum) {
 		$this->summ = $sum;
