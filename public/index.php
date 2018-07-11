@@ -37,13 +37,7 @@ try {
 		$request = $request->withAttribute('user', $user);
 		$request = $request->withAttribute('sum', $sum);
 		$action = function(ServerRequestInterface $request) {
-			$user = $request->getAttribute('user');
-			$sum = $request->getAttribute('sum');
-            $tr = new Transaction;
-            $tr->setSum($sum);
-            $tr->setUserId($user->getId());
-            $tr->setDateTime(date('Y-m-d H:i:s'));
-            $tr->save();
+			$request->getAttribute('user')->addTransaction($request->getAttribute('sum'));
             return (new HtmlResponse(''))->withHeader('Location', '/');
 		};
 	}

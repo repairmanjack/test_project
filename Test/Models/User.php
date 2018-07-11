@@ -2,6 +2,7 @@
 namespace Test\Models;
 
 use Test\DataBase as db;
+use Test\Models\Transaction;
 
 class User {
 	public function __construct() {
@@ -32,6 +33,14 @@ class User {
 	}
 	public function getTransactions() {
 		return Transaction::getAllByUserId($this->getId());
+	}
+	public function addTransaction($sum) {
+		(new Transaction())->fromArray([
+			'summ' => $sum,
+			'datetime' => date('Y-m-d H:i:s'),
+			'user_id' => $this->getId()
+		])->save();
+		return $this->getTransactionSum();
 	}
 	public static function login(Array $authData) {
 		$ret = new User;
